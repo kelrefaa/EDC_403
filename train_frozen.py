@@ -1,4 +1,4 @@
-# train_frozen.py - Step 7b: train a simple classifier on the frozen ChemBERTa embeddings.
+# train_frozen.py - Step 5: train a simple classifier on the frozen ChemBERTa embeddings.
 #
 # What it does: same plan as train_baseline.py, but the input is each chemical's 384-number ChemBERTa
 # embedding instead of its Morgan fingerprint, and the classifier is logistic regression instead of a forest.
@@ -9,12 +9,19 @@
 
 import time
 
+from pathlib import Path
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import average_precision_score, roc_auc_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import PrecisionRecallDisplay
+
+# For visualization plots: Creates folder 'figures' in root directory, if it doesn't already exist.
+FIGURES = Path(__file__).resolve().parent / "figures"
+FIGURES.mkdir(exist_ok=True)
 
 for name in ["er", "ar"]:
     df = pd.read_csv(f"data/{name}_split.csv")                    # SMILES, label, and the two split columns
@@ -57,3 +64,41 @@ for name in ["er", "ar"]:
     df.to_csv(f"data/{name}_frozen_scores.csv", index=False)
 
 print("\nSaved data/er_frozen_scores.csv and data/ar_frozen_scores.csv")
+
+
+# Visualizations: plot test-set precision–recall curves for each splitting method.
+
+print("\nMaking visualizations ...")
+
+# Plot test-set precision–recall curves for each splitting method.
+fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
+
+for ax, name in zip(axes, ["er", "ar"]):
+    df = pd.read_csv(f"data/{name}_frozen_scores.csv")
+
+    # Colors and line styles distinguish methods without relying on color alone.
+    for method, color, style in [
+        ("random", "#0072B2", "-"),
+        ("scaffold", "#D55E00", "--"),
+    ]:
+        test = df[df[f"{method}_split"] == "test"]
+
+        PrecisionRecallDisplay.from_predictions(
+            test["label"], test[f"frozen_{method}_score"],
+            name=method.title(), color=color, linestyle=style, ax=ax,
+        )
+
+        # No-skill reference: the fraction of test chemicals that are active.
+        ax.axhline(test["label"].mean(), color=color, linestyle=":",
+                   label=f"{method.title()} no-skill")
+
+    ax.set(title=name.upper(), xlabel="Recall", ylabel="Precision",
+           xlim=(0, 1), ylim=(0, 1.05))
+    ax.legend(fontsize=8)
+
+fig.suptitle("Frozen ChemBERTa: test-set precision–recall curves")
+fig.tight_layout()
+fig.savefig(FIGURES / "frozen_precision_recall.png", dpi=300)
+plt.close(fig)
+
+print("\nSaved figures/frozen_precision_recall.png")
