@@ -1,4 +1,4 @@
-"""Step 3: turn every SMILES string into a 2,048-bit Morgan fingerprint.
+"""Step 4: turn every SMILES string into a 2,048-bit Morgan fingerprint.
 
 Reads:  data/er_split.csv, data/ar_split.csv
 Writes: data/er_fingerprints.npy, data/ar_fingerprints.npy

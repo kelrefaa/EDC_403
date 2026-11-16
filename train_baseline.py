@@ -1,4 +1,4 @@
-"""Step 4: baseline model = Morgan fingerprint + random forest.
+"""Step 5: baseline model = Morgan fingerprint + random forest.
 
 Reads:  data/er_split.csv, data/ar_split.csv, data/er_fingerprints.npy, data/ar_fingerprints.npy
 Writes: data/er_baseline_scores.csv, data/ar_baseline_scores.csv

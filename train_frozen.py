@@ -1,4 +1,4 @@
-# train_frozen.py - Step 5: train a simple classifier on the frozen ChemBERTa embeddings.
+# train_frozen.py - Step 7: train a simple classifier on the frozen ChemBERTa embeddings.
 #
 # What it does: same plan as train_baseline.py, but the input is each chemical's 384-number ChemBERTa
 # embedding instead of its Morgan fingerprint, and the classifier is logistic regression instead of a forest.

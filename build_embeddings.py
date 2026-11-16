@@ -1,4 +1,4 @@
-# build_embeddings.py - Step 7a: turn every chemical into a ChemBERTa embedding (frozen, no training).
+# build_embeddings.py - Step 6: turn every chemical into a ChemBERTa embedding (frozen, no training).
 #
 # What it does: for ER and for AR, it feeds each chemical's SMILES through the pretrained ChemBERTa model
 # and saves one list of 384 numbers per chemical. ChemBERTa itself is NOT changed ("frozen").
