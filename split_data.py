@@ -15,9 +15,6 @@ from rdkit import RDLogger
 from rdkit.Chem.Scaffolds import MurckoScaffold
 from sklearn.model_selection import train_test_split
 
-# For visualization plots: Creates folder 'figures' in root directory, if it doesn't already exist.
-FIGURES = Path(__file__).resolve().parent / "figures"
-FIGURES.mkdir(exist_ok=True)
 
 RDLogger.DisableLog("rdApp.*")  # keep RDKit's warnings out of the output
 SEED = 42  # fixed number so everyone on the team gets the same random split
@@ -84,48 +81,3 @@ split("ER", "data/er_clean.csv").to_csv("data/er_split.csv", index=False)
 split("AR", "data/ar_clean.csv").to_csv("data/ar_split.csv", index=False)
 
 print("\nSaved data/er_split.csv and data/ar_split.csv")
-
-
-# Visualizations:
-
-print("\nMaking visualizations ...")
-
-# Load the split datasets.
-datasets = {name: pd.read_csv(f"data/{name.lower()}_split.csv")
-            for name in ["ER", "AR"]}
-parts = ["train", "val", "test"]
-
-# Make one figure for counts and another for active percentages.
-for metric in ["size", "mean"]:
-    fig, axes = plt.subplots(1, 2, figsize=(10, 4), sharey=True)
-
-    for ax, (name, df) in zip(axes, datasets.items()):
-        values = pd.DataFrame({
-            method: df.groupby(f"{method.lower()}_split")["label"]
-                      .agg(metric).reindex(parts)
-            for method in ["Random", "Scaffold"]
-        })
-        if metric == "mean":
-            values *= 100
-
-        values.plot.bar(ax=ax, color=["#E69F00", "#D9D9D9"],
-                        edgecolor="black", rot=0)
-        for bar in ax.containers[1]:
-            bar.set_hatch("///")
-        for container in ax.containers:
-            ax.bar_label(container,
-                         fmt="%.0f" if metric == "size" else "%.1f%%",
-                         fontsize=8)
-
-        ax.set(title=name, xlabel="Partition")
-        ax.set_ylabel("Number of chemicals" if metric == "size" else "Active (%)")
-        ax.margins(y=0.2)
-        ax.legend()
-
-    fig.suptitle("Split sizes" if metric == "size" else "Active percentage by split")
-    fig.tight_layout()
-    fig.savefig(FIGURES / f"split_{metric}.png", dpi=300)
-    plt.close(fig)
-
-
-print("\nSaved figures/split_size.png and figures/split_mean.png")

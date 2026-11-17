@@ -1,7 +1,7 @@
 # setup_download.py - one-time setup. Downloads the data and model, then tests them.
 #
 # Run in the terminal:
-#   pip install pandas numpy scikit-learn rdkit torch transformers matplotlib
+#   pip install pandas numpy scikit-learn rdkit torch transformers matplotlib seaborn
 #   python setup_download.py
 
 import urllib.request
