@@ -11,9 +11,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from rdkit import Chem, RDLogger
 
-# For visualization plots: Creates folder 'figures' in root directory, if it doesn't already exist.
-FIGURES = Path(__file__).resolve().parent / "figures"
-FIGURES.mkdir(exist_ok=True)
 
 # RDKit prints a lot of warnings for unusual molecules. We count the unreadable ones ourselves, so silence them.
 RDLogger.DisableLog("rdApp.*")
@@ -61,85 +58,3 @@ er_clean.to_csv("data/er_clean.csv", index=False)
 ar_clean.to_csv("data/ar_clean.csv", index=False)
 
 print("\nSaved data/er_clean.csv and data/ar_clean.csv")
-
-# Visualizations:
-print("\nMaking visualizations ...")
-
-# Chart 1: compare active and inactive counts in the cleaned datasets.
-
-# Count labels for each assay: 0 = inactive, 1 = active.
-counts = pd.DataFrame(
-    {
-        "Inactive": [
-            (er_clean["label"] == 0).sum(),
-            (ar_clean["label"] == 0).sum(),
-        ],
-        "Active": [
-            (er_clean["label"] == 1).sum(),
-            (ar_clean["label"] == 1).sum(),
-        ],
-    },
-    index=["NR-ER", "NR-AR"],
-)
-
-# Use CVD-friendly colors and patterns to distinguish the categories.
-ax = counts.plot.bar(
-    stacked=True,
-    color=["#D9D9D9", "#E69F00"],
-    edgecolor="black",
-    figsize=(7, 5),
-    rot=0,
-)
-
-
-# Label the chart and axes.
-ax.set_title("Active and inactive chemicals after cleaning")
-ax.set_xlabel("Assay")
-ax.set_ylabel("Number of chemicals")
-ax.legend(title="Label")
-
-# Label each section with its chemical count.
-for container in ax.containers:
-    ax.bar_label(container, fmt="%.0f", label_type="center")
-
-# Above each bar, show the percentage of labeled chemicals that are active.
-for position, assay in enumerate(counts.index):
-    total = counts.loc[assay].sum()
-    active_percent = counts.loc[assay, "Active"] / total * 100
-
-    ax.text(
-        position,
-        total + 100,
-        f"{active_percent:.1f}% active",
-        ha="center",
-    )
-
-# Leave room above the bars for the percentage labels.
-ax.set_ylim(0, counts.sum(axis=1).max() * 1.15)
-
-# Fit the labels within the image, save it, then close the figure.
-plt.tight_layout()
-plt.savefig(FIGURES / "assay_activity.png", dpi=300)
-plt.close()
-
-print("\nSaved figures/assay_activity.png")
-
-# Chart 2: available vs. missing labels in the raw dataset.
-
-availability = pd.DataFrame({
-    "Available": raw[["NR-ER", "NR-AR"]].notna().sum(),
-    "Missing": raw[["NR-ER", "NR-AR"]].isna().sum(),
-})
-
-ax = availability.plot.bar(stacked=True, color=["#E69F00", "#D9D9D9"],
-                           edgecolor="black", rot=0, figsize=(7, 5))
-for container in ax.containers:
-    ax.bar_label(container, fmt="%.0f", label_type="center")
-ax.set(title="Label availability before cleaning", xlabel="Assay",
-       ylabel="Number of chemicals")
-plt.tight_layout()
-plt.savefig(FIGURES / "label_availability.png", dpi=300)
-plt.close()
-
-print("Saved figures/label_availability.png")
-
